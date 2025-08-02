@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redirecting...</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    .top-banner {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .glass-box {
+  background: linear-gradient(270deg, #00c8ff, #92fe9d, #00c8ff, #92fe9d),
+              rgba(0, 0, 0, 0.3); /* Dark overlay */
+  background-blend-mode: multiply; /* Blend gradient with black overlay */
+  background-size: 800% 800%;
+  animation: gradientShift 15s ease infinite;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  padding: 30px;
+  color: white;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .circle-timer {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.3);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      margin: 20px auto;
+      user-select: none;
+    }
+
+    .dot-animate::after {
+      content: '';
+      display: inline-block;
+      width: 1em;
+      animation: dots 1.5s steps(3, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ''; }
+      33% { content: '.'; }
+      66% { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    .poster-box {
+      background: #transpared;
+      padding: 12px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      box-shadow: 0 0 15px rgba(0, 198, 255, 0.3);
+    }
+
+    .caption {
+      font-weight: bold;
+      font-size: 16px;
+      color: white;
+    }
+
+    .button-image {
+      width: 100%;
+      border-radius: 10px;
+      border: 2px solid #000;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Banner -->
+  <img src="https://envs.sh/tXT.jpg" alt="AniReal Banner" class="top-banner" />
+
+  <!-- 🔹 Countdown Box with Glass Effect -->
+  <div class="glass-box">
+    <h2>YOUR LINK IS ALMOST READY.</h2>
+    <div id="timer" class="circle-timer">3</div>
+    <p style="font-weight: bold; color: #d9d9d9; font-size: 20px;">
+      🔗 Redirecting Your Link<span class="dot-animate"></span>
+    </p>
+  </div>
+
+  <!-- 🔹 Poster Section -->
+  <div class="poster-box">
+    <p class="caption">🔥 Black Clover (S-02) Hindi Dubbed 🍁<br>🔰 Click Image & Download! 🔰</p>
+    <a href="https://t.me/+iQgEQvJrFl0wYmU1" target="_blank">
+      <img src="https://envs.sh/ew_.jpg" alt="Download" class="button-image" />
+    </a>
+  </div>
+
+  <!-- 🔹 Script -->
+  <script>
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    let countdown = 3;
+    const timer = document.getElementById('timer');
+    let urlParam = getQueryParam('url');
+    let startParam = getQueryParam('start');
+    let redirectTo = "";
+
+    if (urlParam) {
+      redirectTo = decodeURIComponent(urlParam.trim());
+    } else if (startParam) {
+      redirectTo = "https://t.me/AniReal_File_Store_Bot?start=" + encodeURIComponent(startParam.trim());
+    }
+
+    const interval = setInterval(() => {
+      countdown--;
+      timer.textContent = countdown;
+      if (countdown <= 0) {
+        clearInterval(interval);
+        if (redirectTo) window.location.href = redirectTo;
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>
