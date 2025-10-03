@@ -12,7 +12,6 @@ CHANNEL = os.getenv("CHANNEL_USERNAME")
 GROUP_ID = int(os.getenv("GROUP_ID"))
 OWNER_ID = int(os.getenv("OWNER_ID"))
 
-# ✅ Start message directly here
 START_MSG = """
 👋 Hi {mention},
 
@@ -24,15 +23,15 @@ Just type any **anime name** in this group, and I will fetch links from my chann
 
 app = Client("anime_filter_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# 🔥 Notify Owner when Bot Starts
-@app.on_client_start
+# ✅ Notify Owner when bot starts
+@app.on_startup()
 async def notify_owner(client):
     try:
         await client.send_message(OWNER_ID, "✅ Bot Restarted By: @AniReal_Team")
     except Exception as e:
         print(f"Couldn't send restart message: {e}")
 
-# /start command handler (PM + Group both)
+# /start command (works in PM & Groups)
 @app.on_message(filters.command("start"))
 async def start_message(client, message):
     mention = message.from_user.mention
@@ -46,7 +45,7 @@ async def search_anime(query):
             results.append(message.link)
     return results
 
-# Group message handler (anime search)
+# Group message handler
 @app.on_message(filters.chat(GROUP_ID) & filters.text & ~filters.command("start"))
 async def handle_message(client, message):
     query = message.text.strip()
@@ -59,6 +58,3 @@ async def handle_message(client, message):
         await message.reply(reply_text)
     else:
         await message.reply(f"❌ Sorry, '{query}' anime-er kono post amar channel-e nai.")
-
-print("🤖 Bot is running...")
-app.run()
