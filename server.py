@@ -1,7 +1,9 @@
 import os
+import time
 from flask import Flask
 from threading import Thread
 from pyrogram import Client, filters, idle
+from pyrogram.raw import functions
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -13,7 +15,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 OWNER_ID = int(os.getenv("OWNER_ID", 0))
 PORT = int(os.getenv("PORT", 5000))
 
-# Start message (for /start command)
+# Start message for /start command
 START_MSG = """
 👋 Hi {mention},
 
@@ -47,43 +49,32 @@ async def start_command(client, message):
 async def handle_forwarded_video(client, message):
     try:
         chat = message.chat
-        # Check if bot is admin in this chat
+        # Check if bot is admin
         member = await client.get_chat_member(chat.id, "me")
         if not (member.status in ["administrator", "creator"]):
-            return  # bot not admin, ignore
+            return
 
-        # Custom caption (static for now)
+        # Custom caption
         custom_caption = "Title - <anime_name>\nEpisode : <episode_number>\nSeason : <season_number>"
 
-        # Repost video with custom caption
-        await client.send_video(
-            chat_id=chat.id,
-            video=message.video.file_id,
-            caption=custom_caption
-        )
-
-        # Optional: delete original forwarded message
+        # Repost video
+        await client.send_video(chat_id=chat.id, video=message.video.file_id, caption=custom_caption)
         await message.delete()
-
     except Exception as e:
-        print(f"Error handling forwarded video in {message.chat.title or message.chat.id}:", e)
+        print(f"Error in {chat.title or chat.id}: {e}")
 
-# Notify owner when bot starts
+# Notify owner
 async def notify_owner():
     try:
+        # Ensure proper time sync
+        await app.send(functions.Ping(ping_id=int(time.time() * 1e6)))
         await app.send_message(OWNER_ID, "✅ Bot is now online")
     except Exception as e:
         print("Owner notify failed:", e)
 
 if __name__ == "__main__":
-    # Start Flask in background
     Thread(target=run_flask, daemon=True).start()
-
-    # Start Pyrogram bot
     app.start()
-    # Notify owner after bot is online
     app.loop.create_task(notify_owner())
-    # Keep bot running
     idle()
-    # Stop bot gracefully on exit
     app.stop()
