@@ -49,15 +49,12 @@ async def start_command(client, message):
 async def handle_forwarded_video(client, message):
     try:
         chat = message.chat
-        # Check if bot is admin
         member = await client.get_chat_member(chat.id, "me")
         if not (member.status in ["administrator", "creator"]):
             return
 
-        # Custom caption
         custom_caption = "Title - <anime_name>\nEpisode : <episode_number>\nSeason : <season_number>"
 
-        # Repost video
         await client.send_video(chat_id=chat.id, video=message.video.file_id, caption=custom_caption)
         await message.delete()
     except Exception as e:
@@ -66,15 +63,20 @@ async def handle_forwarded_video(client, message):
 # Notify owner
 async def notify_owner():
     try:
-        # Ensure proper time sync
+        # Manual time sync ping
         await app.send(functions.Ping(ping_id=int(time.time() * 1e6)))
         await app.send_message(OWNER_ID, "✅ Bot is now online")
     except Exception as e:
         print("Owner notify failed:", e)
 
 if __name__ == "__main__":
+    # Flask in background
     Thread(target=run_flask, daemon=True).start()
+
+    # Start Pyrogram bot
     app.start()
     app.loop.create_task(notify_owner())
+
+    # Keep bot running
     idle()
     app.stop()
