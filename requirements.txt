@@ -1,5 +1,4 @@
-pyrogram
+pyrogram==2.0.46
 tgcrypto
 python-dotenv
 Flask
-apscheduler
