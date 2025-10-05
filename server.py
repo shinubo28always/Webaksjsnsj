@@ -37,13 +37,16 @@ def run_flask():
 app = Client("anime_video_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # ✅ Notify owner when bot goes online
-@app.on_start()
 async def notify_owner(client):
     try:
         await client.send_message(OWNER_ID, "✅ Bot is now online")
     except Exception as e:
-        print("Owner notification failed:", e)
+        print("Owner notify failed:", e)
 
+# Start bot
+app.start()
+app.loop.create_task(notify_owner(app))
+idle()  # keeps bot running
 # /start command
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
