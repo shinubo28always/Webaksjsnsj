@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from threading import Thread
-from pyrogram import Client, filters
+from pyrogram import Client, filters, idle
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -36,17 +36,6 @@ def run_flask():
 # Pyrogram bot
 app = Client("anime_video_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# ✅ Notify owner when bot goes online
-async def notify_owner(client):
-    try:
-        await client.send_message(OWNER_ID, "✅ Bot is now online")
-    except Exception as e:
-        print("Owner notify failed:", e)
-
-# Start bot
-app.start()
-app.loop.create_task(notify_owner(app))
-idle()  # keeps bot running
 # /start command
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
@@ -58,7 +47,6 @@ async def start_command(client, message):
 async def handle_forwarded_video(client, message):
     try:
         chat = message.chat
-
         # Check if bot is admin in this chat
         member = await client.get_chat_member(chat.id, "me")
         if not (member.status in ["administrator", "creator"]):
@@ -80,7 +68,22 @@ async def handle_forwarded_video(client, message):
     except Exception as e:
         print(f"Error handling forwarded video in {message.chat.title or message.chat.id}:", e)
 
-# Start both Flask and Pyrogram
+# Notify owner when bot starts
+async def notify_owner():
+    try:
+        await app.send_message(OWNER_ID, "✅ Bot is now online")
+    except Exception as e:
+        print("Owner notify failed:", e)
+
 if __name__ == "__main__":
+    # Start Flask in background
     Thread(target=run_flask, daemon=True).start()
-    app.run()
+
+    # Start Pyrogram bot
+    app.start()
+    # Notify owner after bot is online
+    app.loop.create_task(notify_owner())
+    # Keep bot running
+    idle()
+    # Stop bot gracefully on exit
+    app.stop()
