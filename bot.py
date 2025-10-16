@@ -13,7 +13,8 @@ def home():
     return "✅ Bot is Alive on Render!"
 
 def run_flask():
-    app.run(host="0.0.0.0", port=8080)
+    import os
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 def keep_alive():
     t = Thread(target=run_flask)
