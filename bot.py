@@ -1,22 +1,23 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from flask import Flask
 from threading import Thread
 from config import Config
 import asyncio
 
-# Flask app for keeping bot alive on Render
+# Flask setup for Render keep alive
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "✅ Bot is Alive on Render!"
 
-def run():
+def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 def keep_alive():
-    t = Thread(target=run)
+    t = Thread(target=run_flask)
+    t.daemon = True
     t.start()
 
 
@@ -29,39 +30,15 @@ bot = Client(
 )
 
 
-# Send startup message to owner when bot comes online
-async def send_startup_msg():
-    try:
-        await bot.send_message(
-            chat_id=Config.OWNER_ID,
-            text="✅ **Bot is Now Online and Running on Render!** 🚀"
-        )
-        print(f"✅ Startup message sent to owner ({Config.OWNER_ID})")
-    except Exception as e:
-        print(f"❌ Failed to send startup message: {e}")
-
-
-# Start command (with photo + inline buttons)
 @bot.on_message(filters.command("start") & filters.private)
 async def start(_, message):
     me = await bot.get_me()
     buttons = [
-        [
-            InlineKeyboardButton(
-                "➕ Connect Your Group",
-                url=f"https://t.me/{me.username}?startgroup=true"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "📢 Join Our Update Channel",
-                url="https://t.me/YourUpdateChannel"  # replace with your real channel link
-            )
-        ]
+        [InlineKeyboardButton("➕ Connect Your Group", url=f"https://t.me/{me.username}?startgroup=true")],
+        [InlineKeyboardButton("📢 Join Our Update Channel", url="https://t.me/YourUpdateChannel")]  # Replace with real link
     ]
-    
     await message.reply_photo(
-        photo="https://telegra.ph/file/2cfa3dc3b3b6f2d417b23.jpg",  # replace with your image
+        photo="https://telegra.ph/file/2cfa3dc3b3b6f2d417b23.jpg",
         caption=(
             "**👋 Hey Boss!**\n\n"
             "I'm your friendly assistant bot 🤖\n"
@@ -71,16 +48,21 @@ async def start(_, message):
     )
 
 
-# Run Flask + Bot together
+async def main():
+    await bot.start()
+    print("✅ Pyrogram bot started successfully!")
+
+    try:
+        await bot.send_message(Config.OWNER_ID, "✅ Boss! Bot online hoye gese 🔥 Render e successfully run kortese 😎")
+        print(f"📩 Owner PM sent to {Config.OWNER_ID}")
+    except Exception as e:
+        print(f"⚠️ Failed to send PM to owner: {e}")
+
+    await idle()
+    print("🛑 Bot stopped.")
+    await bot.stop()
+
+
 if __name__ == "__main__":
-    keep_alive()
-    print("🚀 Bot is running on Render...")
-
-    async def start_bot():
-        await bot.start()
-        await send_startup_msg()  # Notify owner
-        print("✅ Bot started successfully!")
-        await idle()  # Keep running
-
-    from pyrogram import idle
-    asyncio.run(start_bot())
+    keep_alive()  # Run Flask server
+    asyncio.get_event_loop().run_until_complete(main())
