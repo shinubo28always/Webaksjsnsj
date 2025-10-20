@@ -236,6 +236,61 @@
 </div>
 
   <script>
+    // ===== Slider =====
+let currentSlide = 0;
+const slides = document.querySelectorAll(".slide");
+const dots = document.querySelectorAll(".dot");
+let slideInterval;
+let startX = 0;
+let endX = 0;
+
+function showSlide(index) {
+  slides.forEach((s, i) => s.classList.toggle("active", i === index));
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
+  currentSlide = index;
+}
+
+function nextSlide() {
+  showSlide((currentSlide + 1) % slides.length);
+}
+
+function prevSlide() {
+  showSlide((currentSlide - 1 + slides.length) % slides.length);
+}
+
+// autoplay
+function startSlider() {
+  slideInterval = setInterval(nextSlide, 5000);
+}
+function stopSlider() {
+  clearInterval(slideInterval);
+}
+
+dots.forEach((dot, i) => {
+  dot.addEventListener("click", () => {
+    stopSlider();
+    showSlide(i);
+    startSlider();
+  });
+});
+
+// swipe controls (touch)
+const slider = document.querySelector(".slider");
+slider.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+  stopSlider();
+});
+slider.addEventListener("touchmove", (e) => {
+  endX = e.touches[0].clientX;
+});
+slider.addEventListener("touchend", () => {
+  if (startX - endX > 50) nextSlide(); // swipe left
+  else if (endX - startX > 50) prevSlide(); // swipe right
+  startSlider();
+});
+
+startSlider();
+    
     function toggleDropdown() {
       const menu = document.getElementById("dropdown");
       menu.style.display = menu.style.display === "block" ? "none" : "block";
