@@ -17,6 +17,7 @@
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
+      padding: 0;
     }
 
     /* ===== NAVBAR ===== */
@@ -28,8 +29,9 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       position: relative;
+      z-index: 10;
     }
 
     .navbar-left, .navbar-right {
@@ -60,7 +62,6 @@
     .title {
       font-size: 20px;
       font-weight: bold;
-      transition: all 0.3s ease;
       white-space: nowrap;
     }
 
@@ -88,21 +89,19 @@
     .slider {
       position: relative;
       width: 100%;
-      max-height: 400px;
+      height: 400px;
       overflow: hidden;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #ff4757;
-      border-radius: 10px;
+      border-bottom: 2px solid #ffcc00;
     }
 
     .slide {
+      width: 100%;
+      height: 400px;
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 400px;
       opacity: 0;
-      transition: opacity 0.8s ease-in-out;
+      transition: opacity 1s ease-in-out;
       text-decoration: none;
       color: #fff;
     }
@@ -114,10 +113,10 @@
 
     .slide img {
       width: 100%;
-      height: 400px;
+      height: 100%;
       object-fit: cover;
-      filter: brightness(0.85);
       display: block;
+      filter: brightness(0.8);
     }
 
     .slide-text {
@@ -125,7 +124,7 @@
       bottom: 40px;
       left: 30px;
       color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
 
     .slide-text strong {
@@ -141,23 +140,24 @@
     }
 
     @media(max-width:600px){
-      .slide img { height: 250px; }
+      .slider { height: 250px; }
+      .slide { height: 250px; }
       .slide-text strong { font-size: 20px; }
       .slide-text .genre { font-size: 13px; }
     }
   </style>
 </head>
-<body class="dark">
+<body>
 
   <!-- ===== NAVBAR ===== -->
-  <div class="navbar" id="navbar">
+  <div class="navbar">
     <div class="navbar-left">
       <span class="menu-icon" onclick="toggleDropdown()">☰</span>
       <div class="dropdown" id="dropdown"></div>
     </div>
 
     <div class="title" id="mainTitle">AniReal - Anime Zone</div>
-    <input type="text" id="searchExpanded" class="search-box" placeholder="Search Anime..." autocomplete="off" />
+    <input type="text" id="searchExpanded" class="search-box" placeholder="Search Anime..." />
 
     <div class="navbar-right">
       <span class="search-toggle-icon" onclick="toggleSearch()">🔍</span>
@@ -165,10 +165,10 @@
     </div>
   </div>
 
-  <!-- ===== SLIDER SECTION ===== -->
+  <!-- ===== SLIDER ===== -->
   <div class="slider" id="slider">
     <a href="https://t.me/One_Piece_in_Hindi_Dub_Original" target="_blank" class="slide active">
-      <img src="https://photo.chelpbot.me/AgACAgUAAyEFAASaAAEylQADEWiU1tgqIp1IJb6Nuu6PYVEwX6pfAAKXwzEbiLbhV1Qd9ShGfhLgAQADAgADeQADNgQ/photo.jpg" alt="One Piece" />
+      <img src="https://photo.chelpbot.me/AgACAgUAAyEFAASaAAEylQADEWiU1tgqIp1IJb6Nuu6PYVEwX6pfAAKXwzEbiLbhV1Qd9ShGfhLgAQADAgADeQADNgQ/photo.jpg" alt="One Piece">
       <div class="slide-text">
         <strong>One Piece</strong>
         <div class="genre">Action, Adventure, Comedy, Drama, Fantasy</div>
@@ -176,7 +176,7 @@
     </a>
 
     <a href="https://t.me/+k2wGvZpxSU41NWI1" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdORmiU132Pt3NlsFIXOi6PARnW3iWFAAIhyTEbjUPRVqohEV0vJ2NAAQADAgADeQADNgQ/photo.jpg" alt="Attack on Titan" />
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdORmiU132Pt3NlsFIXOi6PARnW3iWFAAIhyTEbjUPRVqohEV0vJ2NAAQADAgADeQADNgQ/photo.jpg" alt="Attack on Titan">
       <div class="slide-text">
         <strong>Attack on Titan</strong>
         <div class="genre">Action, Drama</div>
@@ -184,7 +184,7 @@
     </a>
 
     <a href="https://t.me/+Py8nEUlgG01mYjE1" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdTuGiU1-iUZpaw4pulnSu1qaN0RYkhAAIzxjEbgIdYVn_RSBv7wE6rAQADAgADeQADNgQ/photo.jpg" alt="Naruto" />
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdTuGiU1-iUZpaw4pulnSu1qaN0RYkhAAIzxjEbgIdYVn_RSBv7wE6rAQADAgADeQADNgQ/photo.jpg" alt="Naruto">
       <div class="slide-text">
         <strong>Naruto</strong>
         <div class="genre">Action, Ninja</div>
@@ -192,7 +192,7 @@
     </a>
 
     <a href="https://t.me/Demon_Slayer_Hindi_Dub05" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhelmmiU3ZF_ytS68JPcstgBzUKdXqonAAI5yTEbGFqhVC7yka4lms_GAQADAgADeAADNgQ/photo.jpg" alt="Demon Slayer" />
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhelmmiU3ZF_ytS68JPcstgBzUKdXqonAAI5yTEbGFqhVC7yka4lms_GAQADAgADeAADNgQ/photo.jpg" alt="Demon Slayer">
       <div class="slide-text">
         <strong>Demon Slayer</strong>
         <div class="genre">Supernatural, Sword</div>
@@ -201,12 +201,8 @@
   </div>
 
   <script>
-    // ===== SLIDER SCRIPT =====
     const slides = document.querySelectorAll(".slide");
     let currentSlide = 0;
-    let slideInterval;
-    let startX = 0;
-    let endX = 0;
 
     function showSlide(index) {
       slides.forEach((slide, i) => {
@@ -219,45 +215,35 @@
       showSlide((currentSlide + 1) % slides.length);
     }
 
-    function prevSlide() {
-      showSlide((currentSlide - 1 + slides.length) % slides.length);
-    }
+    let sliderTimer = setInterval(nextSlide, 5000);
 
-    function startSlider() {
-      slideInterval = setInterval(nextSlide, 5000);
-    }
+    // Swipe support
+    const slider = document.getElementById("slider");
+    let startX = 0, endX = 0;
 
-    function stopSlider() {
-      clearInterval(slideInterval);
-    }
-
-    // Swipe control
-    const slider = document.querySelector(".slider");
     slider.addEventListener("touchstart", (e) => {
       startX = e.touches[0].clientX;
-      stopSlider();
+      clearInterval(sliderTimer);
     });
     slider.addEventListener("touchmove", (e) => {
       endX = e.touches[0].clientX;
     });
     slider.addEventListener("touchend", () => {
       if (startX - endX > 50) nextSlide();
-      else if (endX - startX > 50) prevSlide();
-      startSlider();
+      else if (endX - startX > 50)
+        showSlide((currentSlide - 1 + slides.length) % slides.length);
+      sliderTimer = setInterval(nextSlide, 5000);
     });
 
-    startSlider();
-
-    // ===== NAVBAR SEARCH =====
+    // Navbar search toggle
     function toggleDropdown() {
       const menu = document.getElementById("dropdown");
       menu.style.display = menu.style.display === "block" ? "none" : "block";
     }
 
-    const searchInput = document.getElementById("searchExpanded");
-    const mainTitle = document.getElementById("mainTitle");
-
     function toggleSearch() {
+      const searchInput = document.getElementById("searchExpanded");
+      const mainTitle = document.getElementById("mainTitle");
       if (searchInput.style.display === "inline-block") {
         searchInput.style.display = "none";
         mainTitle.style.display = "block";
