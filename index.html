@@ -19,7 +19,7 @@
       margin: 0;
     }
 
-    /* Navbar */
+    /* ===== NAVBAR ===== */
     .navbar {
       background-color: var(--nav-color);
       padding: 12px 20px;
@@ -95,34 +95,32 @@
       border-radius: 10px;
     }
 
-    .slides {
-      display: flex;
-      transition: transform 0.6s ease-in-out;
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      touch-action: pan-y;
+      height: 400px;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      text-decoration: none;
+      color: #fff;
     }
 
-    .slide {
-      min-width: 100%;
-      position: relative;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
     .slide.active {
       opacity: 1;
+      z-index: 1;
     }
 
     .slide img {
       width: 100%;
       height: 400px;
       object-fit: cover;
-      display: block;
       filter: brightness(0.85);
-      user-select: none;
-      pointer-events: none;
+      display: block;
     }
 
-    .slide-info {
+    .slide-text {
       position: absolute;
       bottom: 40px;
       left: 30px;
@@ -130,30 +128,28 @@
       text-shadow: 0 2px 8px rgba(0,0,0,0.7);
     }
 
-    .slide-info h2 {
+    .slide-text strong {
       font-size: 28px;
-      font-weight: bold;
-      margin: 0 0 6px;
       color: #FFD700;
+      display: block;
+      margin-bottom: 5px;
     }
 
-    .slide-info p {
+    .slide-text .genre {
       font-size: 16px;
-      margin: 0;
       opacity: 0.9;
     }
 
     @media(max-width:600px){
       .slide img { height: 250px; }
-      .slide-info h2 { font-size: 20px; }
-      .slide-info p { font-size: 13px; }
+      .slide-text strong { font-size: 20px; }
+      .slide-text .genre { font-size: 13px; }
     }
-
   </style>
 </head>
 <body class="dark">
 
-  <!-- Navbar -->
+  <!-- ===== NAVBAR ===== -->
   <div class="navbar" id="navbar">
     <div class="navbar-left">
       <span class="menu-icon" onclick="toggleDropdown()">☰</span>
@@ -169,45 +165,53 @@
     </div>
   </div>
 
-  <!-- ===== SLIDER ===== -->
+  <!-- ===== SLIDER SECTION ===== -->
   <div class="slider" id="slider">
-    <div class="slides">
-      <div class="slide active">
-        <img src="https://photo.chelpbot.me/AgACAgUAAxkBXAXUPGjyk1yVWxln0_wimtVwpefMeE-cAAJSyTEbeu7wVu96TTO2Dn10AQADAgADeQADNgQ/photo.jpg" alt="Unknown">
-        <div class="slide-info">
-          <h2>My I Ask For One Final Thing?</h2>
-          <p>Action • Fantasy • Adventure</p>
-        </div>
+    <a href="https://t.me/One_Piece_in_Hindi_Dub_Original" target="_blank" class="slide active">
+      <img src="https://photo.chelpbot.me/AgACAgUAAyEFAASaAAEylQADEWiU1tgqIp1IJb6Nuu6PYVEwX6pfAAKXwzEbiLbhV1Qd9ShGfhLgAQADAgADeQADNgQ/photo.jpg" alt="One Piece" />
+      <div class="slide-text">
+        <strong>One Piece</strong>
+        <div class="genre">Action, Adventure, Comedy, Drama, Fantasy</div>
       </div>
+    </a>
 
-      <div class="slider">
-        <img src="https://photo.chelpbot.me/AgACAgUAAxkBV7dl-2ivQt3jRkALs-qcIdUBS2UomCsTAAKRwDEb_1BRVbRbb8efzaibAQADAgADeAADNgQ/photo.jpg" alt="Death Note">
-        <div class="slide-info">
-          <h2>Death Note</h2>
-          <p>Dark Fantasy • Shounen</p>
-        </div>
+    <a href="https://t.me/+k2wGvZpxSU41NWI1" target="_blank" class="slide">
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdORmiU132Pt3NlsFIXOi6PARnW3iWFAAIhyTEbjUPRVqohEV0vJ2NAAQADAgADeQADNgQ/photo.jpg" alt="Attack on Titan" />
+      <div class="slide-text">
+        <strong>Attack on Titan</strong>
+        <div class="genre">Action, Drama</div>
       </div>
+    </a>
 
-      <div class="slider">
-        <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdORmiU132Pt3NlsFIXOi6PARnW3iWFAAIhyTEbjUPRVqohEV0vJ2NAAQADAgADeQADNgQ/photo.jpg" alt="Attack on Titan">
-        <div class="slide-info">
-          <h2>Attack on Titan</h2>
-          <p>Action • Thriller • Drama</p>
-        </div>
+    <a href="https://t.me/+Py8nEUlgG01mYjE1" target="_blank" class="slide">
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdTuGiU1-iUZpaw4pulnSu1qaN0RYkhAAIzxjEbgIdYVn_RSBv7wE6rAQADAgADeQADNgQ/photo.jpg" alt="Naruto" />
+      <div class="slide-text">
+        <strong>Naruto</strong>
+        <div class="genre">Action, Ninja</div>
       </div>
-    </div>
+    </a>
+
+    <a href="https://t.me/Demon_Slayer_Hindi_Dub05" target="_blank" class="slide">
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhelmmiU3ZF_ytS68JPcstgBzUKdXqonAAI5yTEbGFqhVC7yka4lms_GAQADAgADeAADNgQ/photo.jpg" alt="Demon Slayer" />
+      <div class="slide-text">
+        <strong>Demon Slayer</strong>
+        <div class="genre">Supernatural, Sword</div>
+      </div>
+    </a>
   </div>
 
   <script>
     // ===== SLIDER SCRIPT =====
-    let currentSlide = 0;
     const slides = document.querySelectorAll(".slide");
+    let currentSlide = 0;
     let slideInterval;
     let startX = 0;
     let endX = 0;
 
     function showSlide(index) {
-      slides.forEach((s, i) => s.classList.toggle("active", i === index));
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === index);
+      });
       currentSlide = index;
     }
 
@@ -219,15 +223,15 @@
       showSlide((currentSlide - 1 + slides.length) % slides.length);
     }
 
-    // autoplay
     function startSlider() {
       slideInterval = setInterval(nextSlide, 5000);
     }
+
     function stopSlider() {
       clearInterval(slideInterval);
     }
 
-    // swipe controls (touch)
+    // Swipe control
     const slider = document.querySelector(".slider");
     slider.addEventListener("touchstart", (e) => {
       startX = e.touches[0].clientX;
