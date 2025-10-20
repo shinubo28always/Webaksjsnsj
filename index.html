@@ -1,272 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AniReal - Anime Zone</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniReal - Anime Zone</title>
+<style>
+:root {
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --nav-color: #1e1e1e;
+  --accent-color: #FFD700;
+}
 
-  <style>
-    :root {
-      --bg-color: #121212;
-      --text-color: #ffffff;
-      --nav-color: #1e1e1e;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-    }
+/* ===== NAVBAR ===== */
+.navbar {
+  background-color: var(--nav-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
-    /* ===== NAVBAR ===== */
-    .navbar {
-      background-color: var(--nav-color);
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-    }
+.navbar-left, .navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 
-    .navbar-left, .navbar-right {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+.menu-icon {
+  font-size: 22px;
+  cursor: pointer;
+}
 
-    .menu-icon {
-      font-size: 22px;
-      cursor: pointer;
-      user-select: none;
-      color: var(--text-color);
-    }
+.navbar-center {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    .dropdown {
-      position: absolute;
-      top: 50px;
-      left: 20px;
-      background-color: var(--nav-color);
-      border: 1px solid #333;
-      padding: 10px;
-      display: none;
-      z-index: 10;
-      border-radius: 5px;
-    }
+.title, .search-box {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.3s ease;
+  text-align: center;
+}
 
-    .title {
-      font-size: 20px;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-    }
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
 
-    .search-box {
-      padding: 5px 10px;
-      font-size: 14px;
-      border: 1px solid #555;
-      border-radius: 20px;
-      outline: none;
-      background-color: #2b2b2b;
-      color: #fff;
-      width: 180px;
-      display: none;
-      transition: all 0.3s ease;
-    }
+.search-box {
+  display: none;
+  width: 180px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid #555;
+  background-color: #2b2b2b;
+  color: #fff;
+  outline: none;
+}
 
-    .notification-icon,
-    .search-toggle-icon {
-      font-size: 18px;
-      cursor: pointer;
-      user-select: none;
-    }
+.search-toggle-icon, .notification-icon {
+  font-size: 18px;
+  cursor: pointer;
+}
 
-    /* ===== SLIDER ===== */
-    .slider {
-      position: relative;
-      width: 100%;
-      max-height: 400px;
-      overflow: hidden;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #ff4757;
-      border-radius: 10px;
-    }
+/* Main content */
+main {
+  padding: 20px;
+  text-align: center;
+}
 
-    .slide {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 400px;
-      opacity: 0;
-      transition: opacity 0.8s ease-in-out;
-      text-decoration: none;
-      color: #fff;
-    }
+/* Sections */
+.anime-section {
+  margin: 22px 12px;
+}
 
-    .slide.active {
-      opacity: 1;
-      z-index: 1;
-    }
+.anime-section h2 {
+  font-size: 20px;
+  margin: 8px 0 12px;
+  padding-left: 10px;
+  border-left: 5px solid #ff4757;
+}
 
-    .slide img {
-      width: 100%;
-      height: 400px;
-      object-fit: cover;
-      filter: brightness(0.85);
-      display: block;
-    }
+/* Poster card */
+.anime-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 960/1357;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--nav-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  transition: transform .22s ease, box-shadow .22s ease;
+  text-decoration: none;
+  color: var(--text-color);
+}
 
-    .slide-text {
-      position: absolute;
-      bottom: 40px;
-      left: 30px;
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-    }
+.anime-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+}
 
-    .slide-text strong {
-      font-size: 28px;
-      color: #FFD700;
-      display: block;
-      margin-bottom: 5px;
-    }
+.anime-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    .slide-text .genre {
-      font-size: 16px;
-      opacity: 0.9;
-    }
+.anime-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 45%;
+  background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0));
+  z-index: 1;
+  pointer-events: none;
+}
 
-    @media(max-width:600px){
-      .slide img { height: 250px; }
-      .slide-text strong { font-size: 20px; }
-      .slide-text .genre { font-size: 13px; }
-    }
-  </style>
+.anime-info {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.anime-info h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-color);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anime-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #e6e6e6;
+  opacity: .95;
+}
+
+/* Horizontal scroll */
+.anime-grid.horizontal {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.anime-grid.horizontal .anime-card {
+  flex: 0 0 140px;
+  max-width: 220px;
+  aspect-ratio: 960/1357;
+}
+
+/* Search grid */
+#search-results .anime-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 12px;
+  justify-items: center;
+  align-items: start;
+  margin-top: 8px;
+}
+
+@media(min-width:768px) {
+  #search-results .anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+    gap: 18px;
+  }
+}
+
+/* Not found */
+#notFoundMsg {
+  text-align: center;
+  color: gray;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+footer {
+  text-align: center;
+  padding: 18px;
+  color: #9a9a9a;
+  font-size: 13px;
+}
+
+@media(max-width:360px) {
+  .anime-card{ max-width:180px }
+  .anime-info h3{ font-size:14px }
+  .anime-info p{ font-size:12px }
+}
+</style>
 </head>
-<body class="dark">
+<body>
 
-  <!-- ===== NAVBAR ===== -->
-  <div class="navbar" id="navbar">
-    <div class="navbar-left">
-      <span class="menu-icon" onclick="toggleDropdown()">☰</span>
-      <div class="dropdown" id="dropdown"></div>
-    </div>
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="navbar-left">
+    <span class="menu-icon" onclick="toggleDropdown()">☰</span>
+    <div class="dropdown" id="dropdown"></div>
+  </div>
 
+  <div class="navbar-center">
     <div class="title" id="mainTitle">AniReal - Anime Zone</div>
-    <input type="text" id="searchExpanded" class="search-box" placeholder="Search Anime..." autocomplete="off" />
-
-    <div class="navbar-right">
-      <span class="search-toggle-icon" onclick="toggleSearch()">🔍</span>
-      <span class="notification-icon">🔔</span>
-    </div>
+    <input type="text" id="searchExpanded" class="search-box" placeholder="Search Anime..." autocomplete="off">
   </div>
 
-  <!-- ===== SLIDER SECTION ===== -->
-  <div class="slider" id="slider">
-    <a href="https://t.me/One_Piece_in_Hindi_Dub_Original" target="_blank" class="slide active">
-      <img src="https://photo.chelpbot.me/AgACAgUAAyEFAASaAAEylQADEWiU1tgqIp1IJb6Nuu6PYVEwX6pfAAKXwzEbiLbhV1Qd9ShGfhLgAQADAgADeQADNgQ/photo.jpg" alt="One Piece" />
-      <div class="slide-text">
-        <strong>One Piece</strong>
-        <div class="genre">Action, Adventure, Comedy, Drama, Fantasy</div>
-      </div>
-    </a>
+  <div class="navbar-right">
+    <span class="search-toggle-icon" onclick="toggleSearch()">🔍</span>
+    <span class="notification-icon">🔔</span>
+  </div>
+</div>
 
-    <a href="https://t.me/+k2wGvZpxSU41NWI1" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdORmiU132Pt3NlsFIXOi6PARnW3iWFAAIhyTEbjUPRVqohEV0vJ2NAAQADAgADeQADNgQ/photo.jpg" alt="Attack on Titan" />
-      <div class="slide-text">
-        <strong>Attack on Titan</strong>
-        <div class="genre">Action, Drama</div>
-      </div>
-    </a>
+<main>
+  <p>Welcome! Watch All Hindi Dub Animes Here!</p>
+</main>
 
-    <a href="https://t.me/+Py8nEUlgG01mYjE1" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhdTuGiU1-iUZpaw4pulnSu1qaN0RYkhAAIzxjEbgIdYVn_RSBv7wE6rAQADAgADeQADNgQ/photo.jpg" alt="Naruto" />
-      <div class="slide-text">
-        <strong>Naruto</strong>
-        <div class="genre">Action, Ninja</div>
-      </div>
+<section id="top-hits" class="anime-section">
+  <h2>🔥 Top Hits Anime</h2>
+  <div class="anime-grid horizontal">
+    <a href="#" class="anime-card" data-title="dan da dan">
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBXBTyk2jzhTzE8ghcucHBSJShTpoqTwv6AAJ2C2sb3VehV0iyni70-V4mAQADAgADeQADNgQ/photo.jpg" alt="Dan Da Dan">
+      <div class="anime-info"><h3>Dan Da Dan</h3><p>Episodes: 12</p></div>
     </a>
-
-    <a href="https://t.me/Demon_Slayer_Hindi_Dub05" target="_blank" class="slide">
-      <img src="https://photo.chelpbot.me/AgACAgUAAxkBVhelmmiU3ZF_ytS68JPcstgBzUKdXqonAAI5yTEbGFqhVC7yka4lms_GAQADAgADeAADNgQ/photo.jpg" alt="Demon Slayer" />
-      <div class="slide-text">
-        <strong>Demon Slayer</strong>
-        <div class="genre">Supernatural, Sword</div>
-      </div>
+    <a href="#" class="anime-card" data-title="dr stone">
+      <img src="https://photo.chelpbot.me/AgACAgUAAxkBXBUI-2jzhq0o81hpuYMLoME7AgLxAT9WAAJ9C2sb3VehV9Xw-JLl0Z-WAQADAgADdwADNgQ/photo.jpg" alt="Dr Stone">
+      <div class="anime-info"><h3>Dr. Stone</h3><p>Episodes: 25+</p></div>
     </a>
   </div>
+</section>
 
-  <script>
-    // ===== SLIDER SCRIPT =====
-    const slides = document.querySelectorAll(".slide");
-    let currentSlide = 0;
-    let slideInterval;
-    let startX = 0;
-    let endX = 0;
+<section id="search-results" class="anime-section" style="display:none;">
+  <h2>🔍 Search Results</h2>
+  <div class="anime-grid" id="search-grid"></div>
+  <p id="notFoundMsg" style="display:none;">😢 No anime matched your search.</p>
+</section>
 
-    function showSlide(index) {
-      slides.forEach((slide, i) => {
-        slide.classList.toggle("active", i === index);
-      });
-      currentSlide = index;
+<footer>&copy; 2025 AniReal. All rights reserved.</footer>
+
+<script>
+const searchInput = document.getElementById('searchExpanded');
+const mainTitle = document.getElementById('mainTitle');
+const searchGrid = document.getElementById('search-grid');
+const notFoundMsg = document.getElementById('notFoundMsg');
+
+// Search toggle
+function toggleSearch() {
+  if (searchInput.style.display === 'inline-block') {
+    searchInput.style.display = 'none';
+    mainTitle.style.display = 'block';
+  } else {
+    searchInput.style.display = 'inline-block';
+    mainTitle.style.display = 'none';
+    searchInput.focus();
+  }
+}
+
+// Dropdown toggle
+function toggleDropdown() {
+  const menu = document.getElementById("dropdown");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// Search functionality
+function getAllCards() {
+  return Array.from(document.querySelectorAll('.anime-card'));
+}
+
+function resetPageView() {
+  searchGrid.innerHTML = '';
+  notFoundMsg.style.display = 'none';
+  document.getElementById('top-hits').style.display = 'block';
+  document.getElementById('search-results').style.display = 'none';
+}
+
+function filterAnime(query) {
+  const q = String(query || '').toLowerCase().trim();
+  searchGrid.innerHTML = '';
+  notFoundMsg.style.display = 'none if (!q) {
+    resetPageView();
+    return;
+  }
+
+  // hide main sections
+  document.getElementById('top-hits').style.display = 'none';
+  document.getElementById('search-results').style.display = 'block';
+
+  const all = getAllCards();
+  let found = false;
+  all.forEach(card => {
+    const title = (card.getAttribute('data-title') || '').toLowerCase();
+    if (title.includes(q)) {
+      searchGrid.appendChild(card.cloneNode(true));
+      found = true;
     }
+  });
 
-    function nextSlide() {
-      showSlide((currentSlide + 1) % slides.length);
-    }
+  if (!found) {
+    notFoundMsg.style.display = 'block';
+  }
+}
 
-    function prevSlide() {
-      showSlide((currentSlide - 1 + slides.length) % slides.length);
-    }
+// Events
+searchInput.addEventListener('input', () => filterAnime(searchInput.value));
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') filterAnime(searchInput.value);
+});
 
-    function startSlider() {
-      slideInterval = setInterval(nextSlide, 5000);
-    }
-
-    function stopSlider() {
-      clearInterval(slideInterval);
-    }
-
-    // Swipe control
-    const slider = document.querySelector(".slider");
-    slider.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-      stopSlider();
-    });
-    slider.addEventListener("touchmove", (e) => {
-      endX = e.touches[0].clientX;
-    });
-    slider.addEventListener("touchend", () => {
-      if (startX - endX > 50) nextSlide();
-      else if (endX - startX > 50) prevSlide();
-      startSlider();
-    });
-
-    startSlider();
-
-    // ===== NAVBAR SEARCH =====
-    function toggleDropdown() {
-      const menu = document.getElementById("dropdown");
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
-    }
-
-    const searchInput = document.getElementById("searchExpanded");
-    const mainTitle = document.getElementById("mainTitle");
-
-    function toggleSearch() {
-      if (searchInput.style.display === "inline-block") {
-        searchInput.style.display = "none";
-        mainTitle.style.display = "block";
-      } else {
-        searchInput.style.display = "inline-block";
-        mainTitle.style.display = "none";
-        searchInput.focus();
-      }
-    }
-  </script>
+// Initial reset
+resetPageView();
+</script>
 </body>
 </html>
