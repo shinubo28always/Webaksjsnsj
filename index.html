@@ -3,52 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Zone Player</title>
-    <!-- Google Fonts for Modern Look -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-    
+    <title>Anime Stream Player</title>
     <style>
-        /* 1. Page Background - Gaming/Anime Style Gradient */
+        /* --- Styles (Dark & Modern Look) --- */
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
             color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        /* 2. Glassmorphism Card (Player Box) */
-        .player-card {
-            background: rgba(255, 255, 255, 0.05); /* Transparent Glass */
-            backdrop-filter: blur(10px); /* Blur Effect */
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 15px;
-            width: 90%;
+        /* Player Box Design */
+        .player-container {
+            width: 100%;
             max-width: 900px;
-            box-shadow: 0 0 25px rgba(118, 75, 162, 0.6); /* Purple/Blue Neon Glow */
-            transition: transform 0.3s ease;
+            background: #161616;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); /* Blue Glow */
+            border: 1px solid #333;
         }
 
-        /* Hover karne par thoda sa uthega */
-        .player-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 40px rgba(118, 75, 162, 0.8);
-        }
-
-        /* 3. Video Wrapper (16:9 Fixed Ratio) */
+        /* Responsive Video Wrapper (16:9) */
         .video-wrapper {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%; 
             height: 0;
-            overflow: hidden;
-            border-radius: 12px;
             background: #000;
         }
 
@@ -61,70 +47,111 @@
             border: none;
         }
 
-        /* 4. Stylish Text Section */
-        .info-section {
-            margin-top: 20px;
-            padding: 0 10px;
+        /* Controls / Info Area */
+        .controls-area {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a1a1a;
         }
 
-        .tag {
-            background: #ff0055; /* Hot Pink Tag */
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 10px;
+        h2 { 
+            margin: 0; 
+            font-size: 16px; 
+            color: #ddd; 
+            font-weight: 500;
+        }
+
+        /* External Full Screen Button */
+        .fs-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin-bottom: 10px;
-            box-shadow: 0 0 10px #ff0055;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .fs-btn:hover { background: #2563eb; }
 
-        h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        p {
-            color: #b3b3b3;
-            font-size: 14px;
-            margin-top: 5px;
-            line-height: 1.5;
-        }
-
-        /* Mobile adjustments */
-        @media (max-width: 600px) {
-            .player-card {
-                width: 95%;
-                padding: 10px;
-            }
-            h1 { font-size: 18px; }
+        /* Error Message Style */
+        #error-msg {
+            display: none;
+            color: #ff4d4d;
+            padding: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-card">
-        <div class="video-wrapper">
-            <!-- Yahan apna Link dhyan se replace karein -->
-            <iframe 
-                src="https://player.mediadelivery.net/embed/547896/2b2bf332-b19c-4b5d-a0c5-3544d36a6cfb" 
-                loading="lazy" 
-                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" 
-                allowfullscreen="true"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true">
-            </iframe>
+    <div class="player-container">
+        
+        <div class="video-wrapper" id="videoBox">
+            <!-- Iframe yahan Javascript se inject hoga -->
+            <iframe id="bunnyFrame" src="" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true"></iframe>
         </div>
 
-        <div class="info-section">
-            <div class="tag">Now Playing</div>
-            <h1>Awesome Anime Episode</h1>
-            <p>High quality stream • 1080p • Custom Player</p>
+        <div class="controls-area">
+            <h2 id="videoTitle">Now Playing</h2>
+            <button class="fs-btn" onclick="toggleFullScreen()">⛶ Full Screen</button>
         </div>
+
+        <div id="error-msg">No Video ID Found in URL</div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 👇 SETTINGS: YAHAN APNI LIBRARY ID DALEIN 👇
+        // Bunny Dashboard me Video link dekhein: https://iframe.mediadelivery.net/embed/123456/video-id
+        // Jo number 'embed' ke baad aata hai, wo Library ID hai.
+        const LIBRARY_ID = "547896"; // Example: "286084"
+        
+        // --- Code Logic ---
+        function loadVideo() {
+            // URL se parameters nikalna
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('v'); // ?v= wala part
+            const title = urlParams.get('title'); // Optional ?title= wala part
+
+            const iframe = document.getElementById('bunnyFrame');
+            const errorMsg = document.getElementById('error-msg');
+            const videoWrapper = document.getElementById('videoBox');
+
+            if (videoId) {
+                // Agar Video ID hai, to Iframe ka SRC set karo
+                // Link format: https://iframe.mediadelivery.net/embed/{LIBRARY_ID}/{VIDEO_ID}
+                iframe.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
+                
+                // Agar Title bhi URL me diya hai to change karo
+                if(title) {
+                    document.getElementById('videoTitle').innerText = decodeURIComponent(title);
+                }
+            } else {
+                // Agar ID nahi mili to error dikhao
+                videoWrapper.style.display = 'none';
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Please add ?v=VIDEO_ID to the end of the URL.";
+            }
+        }
+
+        // Zabardasti Full Screen Function
+        function toggleFullScreen() {
+            var elem = document.getElementById("videoBox");
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) elem.requestFullscreen();
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Page load hone par video load karo
+        window.onload = loadVideo;
+    </script>
+
 </body>
-</html>
+    </html>
