@@ -2,40 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anime Stream Player</title>
     <style>
-        /* --- Styles (Dark & Modern Look) --- */
         body {
             margin: 0;
             padding: 0;
-            background-color: #0a0a0a;
+            background-color: #000;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* Player Box Design */
+        /* Normal Player Box */
         .player-container {
             width: 100%;
             max-width: 900px;
-            background: #161616;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); /* Blue Glow */
-            border: 1px solid #333;
+            position: relative;
+            background: #000;
         }
 
-        /* Responsive Video Wrapper (16:9) */
+        /* 16:9 Ratio Wrapper */
         .video-wrapper {
             position: relative;
-            padding-bottom: 56.25%; 
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
             height: 0;
-            background: #000;
         }
 
         .video-wrapper iframe {
@@ -47,111 +44,111 @@
             border: none;
         }
 
-        /* Controls / Info Area */
-        .controls-area {
-            padding: 15px;
+        /* --- ZABARDASTI FULL SCREEN MODE (CSS) --- */
+        /* Jab button dabega to ye class active hogi */
+        .force-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            padding-bottom: 0 !important; /* Ratio hatana padega */
+            background: black !important;
+        }
+        
+        .force-fullscreen iframe {
+            height: 100% !important;
+            width: 100% !important;
+        }
+
+        /* Controls Section */
+        .controls {
+            position: absolute;
+            bottom: -50px; /* Video ke niche */
+            left: 0;
+            width: 100%;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1a1a1a;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 1000000; /* Video se bhi upar */
         }
 
-        h2 { 
-            margin: 0; 
-            font-size: 16px; 
-            color: #ddd; 
-            font-weight: 500;
-        }
-
-        /* External Full Screen Button */
         .fs-btn {
-            background: #3b82f6;
+            background: #007bff;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
             font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
-            transition: 0.2s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        .fs-btn:hover { background: #2563eb; }
+        
+        /* Error Msg */
+        #error-msg { display: none; color: red; padding: 20px; }
 
-        /* Error Message Style */
-        #error-msg {
-            display: none;
-            color: #ff4d4d;
-            padding: 20px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
     <div class="player-container">
-        
+        <!-- Wrapper ID for Fullscreen Toggle -->
         <div class="video-wrapper" id="videoBox">
-            <!-- Iframe yahan Javascript se inject hoga -->
-            <iframe id="bunnyFrame" src="" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true"></iframe>
+            <iframe id="bunnyFrame" src="" scrolling="no" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
         </div>
-
-        <div class="controls-area">
-            <h2 id="videoTitle">Now Playing</h2>
-            <button class="fs-btn" onclick="toggleFullScreen()">⛶ Full Screen</button>
-        </div>
-
-        <div id="error-msg">No Video ID Found in URL</div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <div class="controls">
+        <button class="fs-btn" onclick="toggleMode()">⛶ FULL SCREEN</button>
+    </div>
+
+    <div id="error-msg">Error: URL me ?v=VIDEO_ID add karein</div>
+
     <script>
-        // 👇 SETTINGS: YAHAN APNI LIBRARY ID DALEIN 👇
-        // Bunny Dashboard me Video link dekhein: https://iframe.mediadelivery.net/embed/123456/video-id
-        // Jo number 'embed' ke baad aata hai, wo Library ID hai.
-        const LIBRARY_ID = "547896"; // Example: "286084"
-        
-        // --- Code Logic ---
+        // 👇 YAHAN APNI LIBRARY ID LIKHEIN 👇
+        const LIBRARY_ID = "547896"; // Example ID, ise change karein
+
         function loadVideo() {
-            // URL se parameters nikalna
             const urlParams = new URLSearchParams(window.location.search);
-            const videoId = urlParams.get('v'); // ?v= wala part
-            const title = urlParams.get('title'); // Optional ?title= wala part
-
-            const iframe = document.getElementById('bunnyFrame');
-            const errorMsg = document.getElementById('error-msg');
-            const videoWrapper = document.getElementById('videoBox');
-
+            const videoId = urlParams.get('v'); 
+            
             if (videoId) {
-                // Agar Video ID hai, to Iframe ka SRC set karo
-                // Link format: https://iframe.mediadelivery.net/embed/{LIBRARY_ID}/{VIDEO_ID}
-                iframe.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
+                // Autoplay aur permissions ke sath URL
+                document.getElementById('bunnyFrame').src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true&preload=true`;
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        // --- NEW LOGIC: HYBRID FULL SCREEN ---
+        function toggleMode() {
+            var box = document.getElementById("videoBox");
+            var btn = document.querySelector(".fs-btn");
+
+            // Check karte hain ki abhi fullscreen hai ya nahi
+            if (box.classList.contains("force-fullscreen")) {
+                // Agar Fullscreen hai, to hatao (Normal Mode)
+                box.classList.remove("force-fullscreen");
+                btn.innerHTML = "⛶ FULL SCREEN";
                 
-                // Agar Title bhi URL me diya hai to change karo
-                if(title) {
-                    document.getElementById('videoTitle').innerText = decodeURIComponent(title);
-                }
-            } else {
-                // Agar ID nahi mili to error dikhao
-                videoWrapper.style.display = 'none';
-                errorMsg.style.display = 'block';
-                errorMsg.innerText = "Please add ?v=VIDEO_ID to the end of the URL.";
-            }
-        }
-
-        // Zabardasti Full Screen Function
-        function toggleFullScreen() {
-            var elem = document.getElementById("videoBox");
-            if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) elem.requestFullscreen();
-                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-            } else {
+                // Browser API Exit
                 if (document.exitFullscreen) document.exitFullscreen();
+            } else {
+                // Fullscreen lagao
+                box.classList.add("force-fullscreen");
+                btn.innerHTML = "❌ EXIT";
+
+                // Browser API Try (Backup ke liye)
+                if (box.requestFullscreen) box.requestFullscreen().catch(e => console.log(e));
+                else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen(); // Safari
             }
         }
 
-        // Page load hone par video load karo
         window.onload = loadVideo;
     </script>
 
 </body>
-    </html>
+</html>
