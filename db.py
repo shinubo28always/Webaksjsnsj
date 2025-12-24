@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from config import MONGO_URL
 
 mongo = AsyncIOMotorClient(MONGO_URL)
-db = mongo["DogeshBhai_S4S_Bot"]
+database = mongo["DogeshBhai_S4S_Bot"]
 users = db.users
 orders = db.orders
 
