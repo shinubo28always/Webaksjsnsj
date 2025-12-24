@@ -43,10 +43,10 @@ ABOUT_MSG = """
 • **Version:** 2.0 (Modular)
 • **Language:** Python (Pyrogram)
 • **Database:** MongoDB
-• **Developer:** @YourUsername
+• **Developer:** @DogeshBhai_Pure_Bot
 """
 # IDs
-ADMIN_IDS = [int(x) for x in get_env("ADMIN_IDS", "").split(",")]
+ADMIN_IDS = [int(x) for x in get_env("ADMIN_IDS", "7009167334").split(",")]
 LOG_CHANNEL = int(get_env("LOG_CHANNEL", "-100..."))
 
 # Values
