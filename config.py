@@ -35,8 +35,8 @@ MIN_ORDER_CREDITS = int(get_env("MIN_ORDER_CREDITS", "50"))
 
 # ================= ASSETS (Stickers & Images) =================
 # Kisi bot se Sticker ID nikal kar yahan dalein
-START_STICKER = get_env("START_STICKER", "CAACAgIAAxkBAAEL6_Zl9f_S1-S...") 
-START_IMG = get_env("START_IMG", "https://telegra.ph/file/0c62e604f7c11f71a084c.jpg")
+START_STICKER = get_env("START_STICKER", "CAACAgUAAxkBAAEP4flpKC6Ozwtd25givMwrN3zMcnLeFQACuBYAArKmaFa__rW3azdtFjYE") 
+START_IMG = get_env("START_IMG", "https://graph.org/file/fdc4357abfaba23255e98-24d1bbfa3888cdfcfe.jpg")
 
 # ================= MESSAGES (Customizable) =================
 
