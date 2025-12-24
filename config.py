@@ -47,7 +47,7 @@ ABOUT_MSG = """
 """
 # IDs
 ADMIN_IDS = [int(x) for x in get_env("ADMIN_IDS", "7009167334").split(",")]
-LOG_CHANNEL = int(get_env("LOG_CHANNEL", "-100..."))
+LOG_CHANNEL = int(get_env("LOG_CHANNEL", "-1003202118558"))
 
 # Values
 JOIN_REWARD = int(get_env("JOIN_REWARD", 2))
