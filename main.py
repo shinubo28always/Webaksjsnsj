@@ -1,33 +1,32 @@
-import asyncio
+import os
+import sys
 from pyrogram import Client
 from flask import Flask
 from threading import Thread
-from config import *
+from config import API_ID, API_HASH, BOT_TOKEN, PORT
 
-# Flask app for hosting port binding
+# --- YE FIX HAI: Root path add karo ---
+sys.path.append(os.getcwd()) 
+
+# Flask for Server Port Binding
 web = Flask(__name__)
-
 @web.route('/')
-def home():
-    return "Bot is Running!"
+def home(): return "Bot is Alive!"
 
-def run_flask():
+def run_web():
     web.run(host="0.0.0.0", port=PORT)
 
-# Pyrogram Client with Plugins
+# Bot Client
 app = Client(
     "SubXBot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    plugins=dict(root="plugins") # Ye line sare plugins automatic load karegi
+    plugins=dict(root="plugins")
 )
 
 if __name__ == "__main__":
-    # Start Flask in a separate thread
-    Thread(target=run_flask).start()
-    print("✅ Flask Server Started on Port:", PORT)
-    
-    # Start Bot
+    Thread(target=run_web).start()
+    print(f"🚀 Web Server started on port {PORT}")
     print("🤖 Bot is starting...")
     app.run()
