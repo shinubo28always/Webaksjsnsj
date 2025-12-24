@@ -3,8 +3,8 @@ from config import MONGO_URL
 
 mongo = AsyncIOMotorClient(MONGO_URL)
 database = mongo["DogeshBhai_S4S_Bot"]
-users = db.users
-orders = db.orders
+users = database.users
+orders = database.orders
 
 async def get_user(uid: int):
     user = await users.find_one({"user_id": uid})
