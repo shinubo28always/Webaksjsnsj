@@ -8,14 +8,14 @@ def get_env(key, default=None):
     return os.getenv(key, default)
 
 # Bot API Credentials
-API_ID = int(get_env("API_ID", "12345"))
-API_HASH = get_env("API_HASH", "your_hash")
-BOT_TOKEN = get_env("BOT_TOKEN", "your_token")
-MONGO_URL = get_env("MONGO_URL", "mongodb://...")
+API_ID = int(get_env("API_ID", ""))
+API_HASH = get_env("API_HASH", "")
+BOT_TOKEN = get_env("BOT_TOKEN", "")
+MONGO_URL = get_env("MONGO_URL", "")
 # --- Stickers & Images ---
 # Kisi bhi bot se sticker ka file_id nikal lo
-START_STICKER = "CAACAgIAAxkBAAEL6_Zl9..." 
-START_IMG = "https://telegra.ph/file/your_image_url.jpg"
+START_STICKER = "CAACAgUAAxkBAAEP4flpKC6Ozwtd25givMwrN3zMcnLeFQACuBYAArKmaFa__rW3azdtFjYE" 
+START_IMG = "https://graph.org/file/fdc4357abfaba23255e98-24d1bbfa3888cdfcfe.jpg"
 
 # --- New Texts ---
 START_MSG = """
