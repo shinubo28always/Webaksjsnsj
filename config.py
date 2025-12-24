@@ -1,66 +1,111 @@
 import os
 from dotenv import load_dotenv
 
+# .env file load karo agar exist karti hai
 load_dotenv()
 
-# --- Config Logic: Server Env > .env > Default ---
+# --- Smart Env Helper ---
 def get_env(key, default=None):
-    return os.getenv(key, default)
+    val = os.getenv(key)
+    # Agar variable server setting me nahi hai ya khali choda gaya hai
+    if val is None or val.strip() == "":
+        return default
+    return val.strip()
 
-# Bot API Credentials
+# ================= CREDENTIALS =================
+# Server Settings > .env > Default Value
 API_ID = int(get_env("API_ID", "28568452"))
 API_HASH = get_env("API_HASH", "8439af0a8ecc67bca4859180e7f9c8b9")
 BOT_TOKEN = get_env("BOT_TOKEN", "")
 MONGO_URL = get_env("MONGO_URL", "")
-# --- Stickers & Images ---
-# Kisi bhi bot se sticker ka file_id nikal lo
-START_STICKER = "CAACAgUAAxkBAAEP4flpKC6Ozwtd25givMwrN3zMcnLeFQACuBYAArKmaFa__rW3azdtFjYE" 
-START_IMG = "https://graph.org/file/fdc4357abfaba23255e98-24d1bbfa3888cdfcfe.jpg"
 
-# --- New Texts ---
+# ================= SETTINGS & IDs =================
+# Admin IDs ko list me convert karna (Comma separated input: "123,456")
+admin_str = get_env("ADMIN_IDS", "7009167334")
+ADMIN_IDS = [int(x) for x in admin_str.split(",") if x.strip().isdigit()]
+
+LOG_CHANNEL = int(get_env("LOG_CHANNEL", "-1003202118558"))
+PORT = int(get_env("PORT", "8080"))
+
+# Rewards & Penalties
+JOIN_REWARD = int(get_env("JOIN_REWARD", "2"))
+REF_REWARD = int(get_env("REF_REWARD", "5"))
+PENALTY_CREDITS = int(get_env("PENALTY_CREDITS", "10"))
+MIN_ORDER_CREDITS = int(get_env("MIN_ORDER_CREDITS", "50"))
+
+# ================= ASSETS (Stickers & Images) =================
+# Kisi bot se Sticker ID nikal kar yahan dalein
+START_STICKER = get_env("START_STICKER", "CAACAgIAAxkBAAEL6_Zl9f_S1-S...") 
+START_IMG = get_env("START_IMG", "https://telegra.ph/file/0c62e604f7c11f71a084c.jpg")
+
+# ================= MESSAGES (Customizable) =================
+
 START_MSG = """
 👋 **Welcome to DogeshBhai S4S Bot!**
 
-💰 Balance: `{bal}` Credits
-🎁 Referral Bonus: `{ref}` Credits
+💰 **Balance:** `{bal}` Credits
+🎁 **Refer Bonus:** `{ref}` Credits
 
-Invite friends or join channels to grow your audience!
+Invite friends or join channels to grow your subscribers fast! 🚀
 """
 
 HELP_MSG = """
-❓ **Help Menu**
+❓ **Kaise Kaam Karta Hai?**
 
-• **Earn:** Join channels to get credits.
-• **Add:** Promote your channel (Bot must be admin).
-• **Refer:** Invite friends for free credits.
-• **Penalty:** Don't leave active orders, or credits will be cut!
+1️⃣ **Earn:** 'Earn' button dabayein aur channels join karein.
+2️⃣ **Verify:** Join karne ke baad verify karein, credits mil jayenge.
+3️⃣ **Add:** Credits hone par apna channel add karein.
+4️⃣ **Penalty:** Agar active order leave kiya toh credits cut jayenge!
+
+**Note:** Bot aapke channel me Admin hona chahiye.
 """
 
 ABOUT_MSG = """
-🤖 **About This Bot**
+🤖 **Bot Info**
 
 • **Name:** DogeshBhai S4S
-• **Version:** 2.0 (Modular)
 • **Language:** Python (Pyrogram)
 • **Database:** MongoDB
-• **Developer:** @DogeshBhai_Pure_Bot
+• **Hosting:** Modular Port Binding
+• **Dev:** @DogeshBhai_Pure_Bot
 """
-# IDs
-ADMIN_IDS = [int(x) for x in get_env("ADMIN_IDS", "7009167334").split(",")]
-LOG_CHANNEL = int(get_env("LOG_CHANNEL", "-1003202118558"))
 
-# Values
-JOIN_REWARD = int(get_env("JOIN_REWARD", 2))
-REF_REWARD = int(get_env("REF_REWARD", 5))
-PENALTY_CREDITS = int(get_env("PENALTY_CREDITS", 10))
-MIN_ORDER_CREDITS = int(get_env("MIN_ORDER_CREDITS", 50))
-PORT = int(get_env("PORT", 8080))
+EARN_MSG = """
+Join this channel to earn **{reward}** credits:
 
-# --- MESSAGES & TEXTS ---
-START_MSG = "👋 **Welcome to SubXChange!**\n\n💰 Balance: `{bal}` Credits\n\nInvite friends or join channels to earn!"
-EARN_MSG = "Join this channel to earn {reward} credits:\n\n📌 **{title}**"
-ORDER_SUCCESS = "✅ **Order Placed!**\n\nTarget: {subs} Subscribers.\nCredits Deducted: {credits}"
-PENALTY_MSG = "❌ **Penalty Alert!**\n\nAapne `{title}` leave kiya jabki order active tha. **-{penalty} Credits** cut gaye."
-REFER_MSG = "🔗 **Refer & Earn**\n\nShare this link: `https://t.me/{username}?start={uid}`\n\nHar referral par milenge **{reward} Credits**!"
-NOT_JOINED_MSG = "⚠️ Pehle channel join karo phir verify button dabao!"
-ADMIN_ALERT = "🚀 **New Order Alert!**\n\nUser: `{uid}`\nChannel: {title}\nSubs: {subs}"
+📢 **{title}**
+
+Join karne ke baad niche verify button dabayein. 👇
+"""
+
+ORDER_SUCCESS = """
+✅ **Order Successful!**
+
+📢 **Channel:** {title}
+👥 **Target:** {subs} Subscribers
+💰 **Used:** {credits} Credits
+
+Aapka order live ho chuka hai!
+"""
+
+PENALTY_MSG = """
+❌ **Penalty Alert!**
+
+Aapne `{title}` leave kar diya hai jabki order active tha.
+Isliye aapke **{penalty} Credits** cut kar liye gaye hain. ⚠️
+"""
+
+REFER_MSG = """
+🔗 **Refer & Earn System**
+
+Aapka link niche hai. Isse dosto ko invite karein:
+`https://t.me/{username}?start={uid}`
+
+Har friend ke join karne par aapko milenge **{reward} Credits!** 🎁
+"""
+
+NOT_JOINED_MSG = "⚠️ Aapne abhi join nahi kiya! Pehle join karein phir verify dabayein."
+
+ADMIN_ALERT = "🚀 **New Order Alert!**\n\n👤 User: `{uid}`\n📢 Channel: {title}\n👥 Subs: {subs}"
+
+# ======================================================
