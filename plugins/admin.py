@@ -1,113 +1,64 @@
-import asyncio
-import re
 from pyrogram import Client, filters
-from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked
-from db import users
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from db import is_admin, admins, users, orders
 from config import ADMIN_IDS
 
-# --- Helper Function: Time Parser for tbroadcast ---
-def parse_duration(duration_str):
-    total_seconds = 0
-    # Pattern to find hours and minutes (e.g., 01h, 44m, 01h44m)
-    hours = re.search(r'(\d+)h', duration_str)
-    minutes = re.search(r'(\d+)m', duration_str)
+@Client.on_message(filters.command("admin") & filters.private)
+async def admin_panel(bot, m):
+    if not await is_admin(m.from_user.id): return
     
-    if hours:
-        total_seconds += int(hours.group(1)) * 3600
-    if minutes:
-        total_seconds += int(minutes.group(1)) * 60
-    
-    return total_seconds
+    kb = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📦 Ongoing Orders", callback_data="manage_active_0"),
+            InlineKeyboardButton("✅ Completed Orders", callback_data="manage_history_0")
+        ],
+        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
+        [
+            InlineKeyboardButton("➕ Add Admin", callback_data="add_adm"),
+            InlineKeyboardButton("📋 Admin List", callback_data="list_adm"),
+            InlineKeyboardButton("🗑 Del Admin", callback_data="del_adm")
+        ],
+        [InlineKeyboardButton("⬅️ Back Menu", callback_data="home")]
+    ])
+    await m.reply("🛠 **Admin Control Panel**\nSare orders aur admins yahan se manage karein.", reply_markup=kb)
 
-# ================= 1. NORMAL BROADCAST =================
-@Client.on_message(filters.command("broadcast") & filters.user(ADMIN_IDS))
-async def normal_broadcast(bot, m):
-    if not m.reply_to_message:
-        return await m.reply("❌ Kisi message ko reply karke command do!")
-    
-    msg = await m.reply("🚚 **Normal Broadcast shuru ho raha hai...**")
-    all_users = users.find({})
-    count = 0
-    blocked = 0
-    
-    async for user in all_users:
-        try:
-            await m.reply_to_message.copy(chat_id=user['user_id'])
-            count += 1
-            await asyncio.sleep(0.3) # Rate limit se bachne ke liye
-        except FloodWait as e:
-            await asyncio.sleep(e.value)
-        except (UserIsBlocked, InputUserDeactivated):
-            blocked += 1
-        except Exception:
-            pass
-            
-    await msg.edit(f"✅ **Broadcast Complete!**\n\n👤 Sent to: {count}\n🚫 Blocked: {blocked}")
+@Client.on_callback_query(filters.regex("^admin_stats$"))
+async def admin_stats_h(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    u = await users.count_documents({})
+    o = await orders.count_documents({})
+    ao = await orders.count_documents({"status": "active"})
+    text = f"📊 **Bot Stats**\n\n👤 Total Users: `{u}`\n📦 Total Orders: `{o}`\n🚀 Active Orders: `{ao}`"
+    await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_back")]]))
 
-# ================= 2. PIN BROADCAST =================
-@Client.on_message(filters.command("pbroadcast") & filters.user(ADMIN_IDS))
-async def pin_broadcast(bot, m):
-    if not m.reply_to_message:
-        return await m.reply("❌ Message ko reply karke `/pbroadcast` likho!")
-    
-    msg = await m.reply("📌 **Pin Broadcast shuru ho raha hai...**")
-    all_users = users.find({})
-    count = 0
-    
-    async for user in all_users:
-        try:
-            sent_msg = await m.reply_to_message.copy(chat_id=user['user_id'])
-            await bot.pin_chat_message(chat_id=user['user_id'], message_id=sent_msg.id, both_sides=True)
-            count += 1
-            await asyncio.sleep(0.5)
-        except FloodWait as e:
-            await asyncio.sleep(e.value)
-        except Exception:
-            pass
-            
-    await msg.edit(f"✅ **Pin Broadcast Complete!**\nSent & Pinned for {count} users.")
+@Client.on_callback_query(filters.regex("^list_adm$"))
+async def list_admins(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    text = "👮 **Admins List:**\n\n"
+    async for adm in admins.find({}):
+        text += f"• `{adm['user_id']}`\n"
+    await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_back")]]))
 
-# ================= 3. TEMPORARY BROADCAST =================
-@Client.on_message(filters.command("tbroadcast") & filters.user(ADMIN_IDS))
-async def temp_broadcast(bot, m):
-    if not m.reply_to_message:
-        return await m.reply("❌ Message ko reply karke `/tbroadcast 01h30m` likho!")
-    
-    if len(m.command) < 2:
-        return await m.reply("📝 **Format:** `/tbroadcast 01h30m` (Max 12h)")
-    
-    duration_str = m.command[1]
-    seconds = parse_duration(duration_str)
-    
-    if seconds <= 0:
-        return await m.reply("❌ Galat format! Use: `01h`, `10m`, ya `01h20m`")
-    
-    if seconds > 43200: # 12 Hours limit
-        return await m.reply("⚠️ Max limit 12 hours hai!")
+@Client.on_callback_query(filters.regex("^(add_adm|del_adm)$"))
+async def adm_action_msg(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    cmd = "add_admin" if cb.data == "add_adm" else "del_admin"
+    await cb.message.edit_text(f"Admin handle karne ke liye command use karein:\n\n`/{cmd} [UserID]`")
 
-    msg = await m.reply(f"⏳ **Temp Broadcast shuru...**\nMessage {duration_str} baad delete ho jayega.")
-    all_users = users.find({})
-    
-    sent_messages = [] # List to track messages for deletion
+@Client.on_callback_query(filters.regex("^admin_back$"))
+async def back_to_adm(bot, cb): await admin_panel(bot, cb.message)
 
-    async for user in all_users:
-        try:
-            sent = await m.reply_to_message.copy(chat_id=user['user_id'])
-            sent_messages.append((user['user_id'], sent.id))
-            await asyncio.sleep(0.3)
-        except Exception:
-            pass
+# Commands for Owners to Manage Admins
+@Client.on_message(filters.command("add_admin") & filters.user(ADMIN_IDS))
+async def add_adm_cmd(bot, m):
+    if len(m.command) < 2: return
+    tid = int(m.command[1])
+    await admins.update_one({"user_id": tid}, {"$set": {"user_id": tid}}, upsert=True)
+    await m.reply(f"✅ User `{tid}` added as admin.")
 
-    await msg.edit(f"🚀 **Broadcast Sent!**\nAb ye {duration_str} tak rahega.")
-    
-    # Wait for the duration
-    await asyncio.sleep(seconds)
-    
-    # Delete messages
-    for user_id, msg_id in sent_messages:
-        try:
-            await bot.delete_messages(chat_id=user_id, message_ids=msg_id)
-        except:
-            pass
-            
-    await m.reply(f"🗑 **Temp Broadcast Cleanup Complete!**\nSaare messages delete kar diye gaye.")
+@Client.on_message(filters.command("del_admin") & filters.user(ADMIN_IDS))
+async def del_adm_cmd(bot, m):
+    if len(m.command) < 2: return
+    tid = int(m.command[1])
+    await admins.delete_one({"user_id": tid})
+    await m.reply(f"🗑 User `{tid}` removed from admin.")
