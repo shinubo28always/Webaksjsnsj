@@ -8,8 +8,8 @@ def get_env(key, default=None):
     return os.getenv(key, default)
 
 # Bot API Credentials
-API_ID = int(get_env("API_ID", ""))
-API_HASH = get_env("API_HASH", "")
+API_ID = int(get_env("API_ID", "28568452"))
+API_HASH = get_env("API_HASH", "8439af0a8ecc67bca4859180e7f9c8b9")
 BOT_TOKEN = get_env("BOT_TOKEN", "")
 MONGO_URL = get_env("MONGO_URL", "")
 # --- Stickers & Images ---
