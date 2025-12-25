@@ -1,43 +1,78 @@
 import math
+import time
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from db import orders, users, is_admin
 from config import JOIN_REWARD, LOG_CHANNEL
 from bson import ObjectId
 
-# --- 1. COMMAND HANDLER (/orders) ---
-# Ye command ab kaam karegi
+# --- 1. MAIN ORDERS COMMAND ---
 @Client.on_message(filters.command("orders") & filters.private)
-async def admin_orders_cmd(bot, m):
+async def admin_orders_dashboard(bot, m):
     # Check if user is admin
     if not await is_admin(m.from_user.id):
         return
 
+    # Counting for buttons
     active_count = await orders.count_documents({"status": "active"})
     completed_count = await orders.count_documents({"status": "completed"})
     
+    # ROW 1: Ongoing | Completed
+    # ROW 2: Ping | Stats
     kb = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton(f"🚀 Active ({active_count})", callback_data="manage_active_0"),
-            InlineKeyboardButton(f"✅ History ({completed_count})", callback_data="manage_history_0")
+            InlineKeyboardButton(f"📦 Ongoing ({active_count})", callback_data="manage_active_0"),
+            InlineKeyboardButton(f"✅ Completed ({completed_count})", callback_data="manage_history_0")
         ],
-        [InlineKeyboardButton("⬅️ Back Menu", callback_data="home")]
+        [
+            InlineKeyboardButton("📌 Ping", callback_data="admin_ping"),
+            InlineKeyboardButton("📊 Stats", callback_data="admin_stats")
+        ],
+        [InlineKeyboardButton("⬅️ Back to Admin Panel", callback_data="admin_back")]
     ])
     
-    await m.reply("📂 **Orders Management**\n\nNiche diye gaye buttons se orders manage karein:", reply_markup=kb)
+    await m.reply(
+        "📂 **Orders Control Center**\n\nNiche diye gaye buttons se orders manage karein ya bot ki performance check karein.", 
+        reply_markup=kb
+    )
 
+# --- 2. PING LOGIC (Response Time) ---
+@Client.on_callback_query(filters.regex("^admin_ping$"))
+async def ping_handler(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    
+    start_time = time.time()
+    await cb.answer("Pinging...", show_alert=False)
+    end_time = time.time()
+    
+    ping_ms = round((end_time - start_time) * 1000, 2)
+    
+    await cb.message.edit_text(
+        f"🚀 **Bot Latency (Ping)**\n\n📶 Speed: `{ping_ms} ms`\n🛰 Server: Online\n\nBot ekdam fast respond kar raha hai!",
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="orders_home")]])
+    )
 
-# --- Helper: Check Admin Authorization for Callbacks ---
-async def check_admin(cb):
-    if not await is_admin(cb.from_user.id):
-        await cb.answer("❌ Aap Admin nahi hain!", show_alert=True)
-        return False
-    return True
+# --- 3. STATS LOGIC ---
+@Client.on_callback_query(filters.regex("^admin_stats$"))
+async def stats_handler(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    
+    u_count = await users.count_documents({})
+    o_total = await orders.count_documents({})
+    o_active = await orders.count_documents({"status": "active"})
+    
+    text = (f"📊 **Live Statistics**\n\n"
+            f"👤 Total Users: `{u_count}`\n"
+            f"📦 Total Orders: `{o_total}`\n"
+            f"🚀 Active Orders: `{o_active}`\n"
+            f"💰 Admin Balance: Unlimited")
+    
+    await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="orders_home")]]))
 
-# --- 2. LIST VIEW WITH PAGINATION (Active/History) ---
+# --- 4. LIST VIEW WITH PAGINATION (Ongoing/Completed) ---
 @Client.on_callback_query(filters.regex(r"^manage_(active|history)_(\d+)$"))
 async def list_orders(bot, cb):
-    if not await check_admin(cb): return
+    if not await is_admin(cb.from_user.id): return
     
     o_type = cb.data.split("_")[1]
     page = int(cb.data.split("_")[2])
@@ -51,96 +86,76 @@ async def list_orders(bot, cb):
     
     if total_orders == 0:
         return await cb.message.edit_text(f"❌ Abhi koi {status} orders nahi hain.", 
-                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="admin_home")]]))
+                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="orders_home")]]))
 
     cursor = orders.find({"status": status}).skip(skip).limit(limit)
     
-    text = f"📂 **Manage {status.capitalize()} Orders**\nPage: `{page+1}/{total_pages}`\n\nOrder manage karne ke liye niche click karein:"
+    text = f"📂 **Manage {status.capitalize()} Orders**\nPage: `{page+1}/{total_pages}`"
     buttons = []
     
     async for o in cursor:
         buttons.append([InlineKeyboardButton(f"📢 {o['title']} ({o['completed']}/{o['subscribers']})", callback_data=f"view_{o['_id']}")])
     
-    # Pagination Buttons
     nav_btns = []
     if page > 0:
-        nav_btns.append(InlineKeyboardButton("⬅️ Back", callback_data=f"manage_{o_type}_{page-1}"))
+        nav_btns.append(InlineKeyboardButton("⬅️ Previous", callback_data=f"manage_{o_type}_{page-1}"))
     if page < total_pages - 1:
         nav_btns.append(InlineKeyboardButton("Next ➡️", callback_data=f"manage_{o_type}_{page+1}"))
     
-    if nav_btns:
-        buttons.append(nav_btns)
-    
-    buttons.append([InlineKeyboardButton("⬅️ Admin Menu", callback_data="admin_home")])
+    if nav_btns: buttons.append(nav_btns)
+    buttons.append([InlineKeyboardButton("⬅️ Orders Menu", callback_data="orders_home")])
     
     await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
-# --- 3. SPECIFIC ORDER VIEW (Details & Actions) ---
+# --- 5. ORDER DETAILS & CANCEL/REFUND ---
 @Client.on_callback_query(filters.regex(r"^view_"))
-async def view_order_detail(bot, cb):
-    if not await check_admin(cb): return
-    
+async def view_detail(bot, cb):
+    if not await is_admin(cb.from_user.id): return
     oid = cb.data.split("_")[1]
     o = await orders.find_one({"_id": ObjectId(oid)})
     
-    if not o:
-        return await cb.answer("Order nahi mila!", show_alert=True)
+    if not o: return await cb.answer("Order not found!")
     
-    text = (f"📑 **Order Details**\n\n"
-            f"📢 **Channel:** {o['title']}\n"
-            f"👤 **Owner:** `{o['user_id']}`\n"
-            f"👥 **Progress:** `{o['completed']}/{o['subscribers']}`\n"
-            f"💰 **Total Cost:** {o['subscribers'] * JOIN_REWARD} Credits\n"
-            f"🚦 **Status:** {o['status'].upper()}\n"
-            f"🆔 **ID:** `{o['_id']}`")
+    text = (f"📑 **Order Info**\n\n"
+            f"📢 Channel: {o['title']}\n"
+            f"👥 Target: `{o['completed']}/{o['subscribers']}`\n"
+            f"🆔 ID: `{o['_id']}`\n"
+            f"🚦 Status: {o['status'].upper()}")
     
     kb = []
     if o['status'] == "active":
-        kb.append([InlineKeyboardButton("❌ Cancel & Partial Refund", callback_data=f"cancel_{oid}")])
-    
+        kb.append([InlineKeyboardButton("❌ Cancel & Refund", callback_data=f"cancel_{oid}")])
     kb.append([InlineKeyboardButton("🗑 Force Delete", callback_data=f"fdelete_{oid}")])
-    kb.append([InlineKeyboardButton("⬅️ Back to List", callback_data="manage_active_0")])
+    kb.append([InlineKeyboardButton("⬅️ Back", callback_data="manage_active_0")])
     
     await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup(kb))
 
-# --- 4. CANCEL & PARTIAL REFUND LOGIC ---
-@Client.on_callback_query(filters.regex(r"^cancel_"))
-async def cancel_order(bot, cb):
-    if not await check_admin(cb): return
-    
-    oid = cb.data.split("_")[1]
+# --- 6. REFUND & DELETE LOGIC ---
+@Client.on_callback_query(filters.regex(r"^(cancel|fdelete)_"))
+async def action_handler(bot, cb):
+    if not await is_admin(cb.from_user.id): return
+    action, oid = cb.data.split("_")
     o = await orders.find_one({"_id": ObjectId(oid)})
     
-    if not o or o['status'] != "active":
-        return await cb.answer("Order cancel nahi ho sakta!")
+    if action == "cancel":
+        remaining = o['subscribers'] - o['completed']
+        refund = max(0, remaining * JOIN_REWARD)
+        await users.update_one({"user_id": o['user_id']}, {"$inc": {"credits": refund}})
+        await orders.update_one({"_id": ObjectId(oid)}, {"$set": {"status": "cancelled"}})
+        await cb.answer(f"Refunded {refund} credits!", show_alert=True)
+    else:
+        await orders.delete_one({"_id": ObjectId(oid)})
+        await cb.answer("Order Deleted!", show_alert=True)
+        
+    await cb.message.edit_text("✅ Task Completed!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="orders_home")]]))
 
-    remaining = o['subscribers'] - o['completed']
-    refund = max(0, remaining * JOIN_REWARD)
-    
-    await users.update_one({"user_id": o['user_id']}, {"$inc": {"credits": refund}})
-    await orders.update_one({"_id": ObjectId(oid)}, {"$set": {"status": "cancelled"}})
-    
-    try: await bot.send_message(LOG_CHANNEL, f"🛑 **Order Cancelled**\nChannel: {o['title']}\nRefund: {refund}")
-    except: pass
-    
-    try: await bot.send_message(o['user_id'], f"⚠️ Aapka order `{o['title']}` cancel kar diya gaya hai. {refund} credits wapas mil gaye hain.")
-    except: pass
-    
-    await cb.answer(f"✅ Refunded {refund} credits.", show_alert=True)
-    await cb.message.edit_text("🔄 Processed!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="manage_active_0")]]))
+# --- NAVIGATION HELPER ---
+@Client.on_callback_query(filters.regex("^orders_home$"))
+async def home_nav(bot, cb):
+    await admin_orders_dashboard(bot, cb.message)
 
-# --- 5. FORCE DELETE ---
-@Client.on_callback_query(filters.regex(r"^fdelete_"))
-async def force_delete_order(bot, cb):
-    if not await check_admin(cb): return
-    oid = cb.data.split("_")[1]
-    await orders.delete_one({"_id": ObjectId(oid)})
-    await cb.answer("🗑 Deleted!", show_alert=True)
-    await cb.message.edit_text("✅ Removed.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="manage_active_0")]]))
-
-# Helper for Admin Home (redirects to /admin panel view)
-@Client.on_callback_query(filters.regex("^admin_home$"))
-async def back_to_dash(bot, cb):
-    # This button logic should exist in admin.py to show the full panel
+@Client.on_callback_query(filters.regex("^admin_back$"))
+async def back_to_main_panel(bot, cb):
+    # Import locally to avoid circular import
     from plugins.admin import admin_panel
     await admin_panel(bot, cb.message)
