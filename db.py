@@ -29,3 +29,11 @@ async def is_admin(uid):
     # Phir check karo Database wale Admins
     admin = await admins.find_one({"user_id": uid})
     return True if admin else False
+
+# db.py mein ye functions add ya replace karein
+async def set_step(uid, step):
+    await users.update_one({"user_id": uid}, {"$set": {"step": step}})
+
+async def get_step(uid):
+    user = await users.find_one({"user_id": uid})
+    return user.get("step") if user else None
