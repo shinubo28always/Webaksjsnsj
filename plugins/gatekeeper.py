@@ -1,18 +1,16 @@
 from pyrogram import Client, filters
-from config import LOG_CHANNEL, ADMIN_IDS
-from db import get_step
+from config import LOG_CHANNEL
+from db import get_user_data
 
 @Client.on_message(filters.private & filters.text & ~filters.command(["start", "admin", "orders", "addcredit", "cancel_order", "add_admin", "del_admin", "broadcast", "pbroadcast", "tbroadcast"]))
-async def forward_random_messages(bot, m):
-    uid = m.from_user.id
-    step = await get_step(uid)
+async def gatekeeper(bot, m):
+    user_data = await get_user_data(m.from_user.id)
+    step = user_data.get("step")
     
-    # Agar user kisi step (jaise add_channel) mein nahi hai, toh msg forward karo
-    if step is None:
-        # 1. Admin ko forward karo with tag
-        await m.forward(LOG_CHANNEL)
-        
-        # 2. User ko batao (Optional)
-        await m.reply("⚠️ Ye koi valid command nahi hai. Aapka message Admin ko bhej diya gaya hai.")
-
-# Forward tags ke sath message bhejta hai automatically .forward() use karne par.
+    # Agar user koi process (Add Channel/Credits) nahi kar raha tabhi forward karo
+    if not step:
+        try:
+            await m.forward(LOG_CHANNEL)
+            # User ko msg bhi bhej sakte ho (Optional)
+        except Exception as e:
+            print(f"Log Error: {e}")
