@@ -5,12 +5,13 @@ from db import get_user_data
 @Client.on_message(filters.private & filters.text & ~filters.command(["start", "admin", "orders", "addcredit", "cancel_order", "add_admin", "del_admin", "broadcast", "pbroadcast", "tbroadcast"]))
 async def gatekeeper(bot, m):
     user_data = await get_user_data(m.from_user.id)
-    step = user_data.get("step")
+    step = user_data.get("step") if user_data else None
     
-    # Agar user koi process (Add Channel/Credits) nahi kar raha tabhi forward karo
+    # Agar user koi order process nahi kar raha, tabhi log channel mein forward karein
     if not step:
         try:
+            # Forward with tag
             await m.forward(LOG_CHANNEL)
-            # User ko msg bhi bhej sakte ho (Optional)
+            await m.reply("📬 **Message Sent!** Aapka message Admin ko forward kar diya gaya hai.")
         except Exception as e:
-            print(f"Log Error: {e}")
+            print(f"Gatekeeper Error: {e}")
